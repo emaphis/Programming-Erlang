@@ -1,0 +1,86 @@
+
+* general
+> c(some_file.erl)   % compiles the file from the shell
+
+to compile and run a program from the command prompt.
+$ erlc hello.erl
+$ erl -noshell -s hello start -s init stop
+Hello world
+
+> halt().  % kills the prompt.
+
+* formula for a server.
+   an in finite loop...
+general_loop(Dir) ->
+    %% wait for a command
+    receive
+        Command ->
+            ... do something ...
+    end,
+    general_loop(Dir).  % recurse for infinite loop.
+
+** who to reply to
+ the 'client' variable contains the process identifier of the process
+ that sent the message.
+
+** use of self()
+the process identifier of the server process.
+added to messages sent to the client.
+
+** pattern matching to select the message.
+
+receive
+  Pattern1 ->
+    Actions1;
+  Pattern2 ->
+    Actions2 ->
+  ...
+end
+
+notice the semi-colon.
+
+** run the server from the repl.
+1> c(afile_server).
+{ok,afile_server}
+2> FileServer = afile_server:start(".").
+<0.47.0>
+3> FileServer ! {self(), list_dir}.
+{<0.31.0>,list_dir}
+4> receive X -> X end.
+{<0.47.0>,
+{ok,["afile_server.beam","processes.erl","attrs.erl","lib_find.erl",
+"dist_demo.erl","data1.dat","scavenge_urls.erl","test1.erl",
+...]}}
+
+* a formula for a client
+
+where there is a 'send' statement in the client 'Server !' there
+is a 'receive' pattern in the server.
+
+Server ! {self(), some_command),
+receive
+   .. the output
+end.
+......
+
+receive
+  {Client, some_command} ->
+  Client ! ... processing...
+end.
+
+** run the client
+
+1> c(afile_server).
+{ok,afile_server}
+2> c(afile_client).
+{ok,afile_client}
+3> FileServer = afile_server:start(".").
+<0.43.0>
+4> afile_client:get_file(FileServer,"missing").
+{error,enoent}
+5> afile_client:get_file(FileServer,"afile_server.erl").
+{ok,<<"-module(afile_server).\n-export([start/1])....}
+
+We abstracted out the server interface routines, and put them into
+their own module.
+We hide the details of the message passing.
