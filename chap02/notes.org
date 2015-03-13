@@ -84,3 +84,17 @@ end.
 We abstracted out the server interface routines, and put them into
 their own module.
 We hide the details of the message passing.
+
+* the three concurrency primatives: spawn, send, receive.
+
+* hello_server.erl
+a better hello world example for Erlang,
+from: http://egarson.blogspot.com/2008/03/real-erlang-hello-world.html
+
+invoke:
+> Pid = hello_server:start().
+<0.36.0>
+
+stop the server:
+> Pid ! goodbye.
+goodbye
