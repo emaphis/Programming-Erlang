@@ -1,5 +1,5 @@
 -module(afile_client).
--export([ls/1, get_file/2]).
+-export([ls/1, get_file/2, put_file/3]).
 
 ls(Server) ->
     Server ! {self(), list_dir},
@@ -13,4 +13,12 @@ get_file(Server, File) ->
     receive
         {Server, Content} ->
             Content
+    end.
+
+%% exercise 4.
+put_file(Server, File, Data) ->
+    Server ! {self(), {put_file, File, Data}},
+    receive
+        {Server, Result} ->
+            Result
     end.
