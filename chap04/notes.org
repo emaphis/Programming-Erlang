@@ -15,6 +15,12 @@ function pattern matching clauses are separated by semi-colons.
 
 head() -> body.
 
+using pattern matching for clauses the order matters, the first
+succeeding claus is the one that is mactched.
+
+If we fail to match any clause the program will fail with a runtime
+error. This is the way to programm in erlang.
+
 * directories and code paths
 pwd().   - prints the current working directory
 ls().    - lists the names of the files in cwd.
@@ -23,3 +29,96 @@ cd(Dir). - changes to current working directory.
 * adding tests to code.
 using pattern matching can be used to create effective tests
 for erlang functions.
+
+* where to put the semicolons.
+commas     - separate arguments to function calls, data constructors,
+             and patterns.
+semicolons - separate clauses in several contexts: function definition,
+             cas, if, try..catch, and receive expressions.
+periods    - separate entire functions and expressions in the shell.
+
+
+* funs: the basic unit of abstraction
+since erlang is a functional language, funs can be passed as
+arguments, returned from functions and stored as values.
+
+funs can be used to perform the same operation on each element of
+a list, to create new control structures, implement things like
+ parsing code and parsing combinators.
+
+funs are anonymous functions:
+> Double = fun(X) -> 2*X end.
+
+> Hypot = fun(X, Y) -> math:sqrt(X*X + Y*Y) end.
+
+> TempConvert = fun({c,C}) -> {f, 32 + C*9/5};
+>                  ({f,F}) -> {c, (F-32)*5/9}
+>               end.
+
+** functions that have funs as their arguements
+> lists:map(fun(X) -> 2*X end, List).
+
+> Even = fun(X) -> (X rem 2) =:= 0 end.
+> lists:map(Even, [1,2,3,4,5,6,8]).
+> lists:filter(Even, [1,2,3,4,5,6,8]).
+
+** functions that return funs
+> Fruit = [apple,pear,orange].
+> MakeTest = fun(L) -> (fun(X) -> lists:member(X, L) end) end. %% wow!
+> IsFruit = MakeTest(Fruit).
+
+> lists:filter(IsFruit, [dog,orange,cat,apple,bear]).
+
+%% a function that returns a normal value:
+> Double = fun(X) -> ( 2 * X ) end.
+
+%% the thing in the parentheses is the return value:
+%% so return a function (that we can apply or return as a value:
+> Mult = fun(Times) -> ( fun(X) -> X * Times end ) end.
+
+> fun(X) -> X * 3 end (5). => 15
+
+
+* simple list processing
+- don't forget the base case.
+-import(foo, [blah/0]).  % so we don't have to qualify names.
+
+* list comprehensions
+- expressions that create lists without have to use funs, maps, filters
+
+> mylists:map(fun(N) -> N*2 end, L).
+%or.
+> [2*X || X <- L ].
+
+> Buy=[{oranges,4},{newspaper,1},{apples,10},{pears,6},{milk,3}].
+> [{Name, 2*Number} || {Name, Number} <- Buy].
+%% matching patterns to patterns.
+%% tuple on left side is called a 'constructor'.
+
+%% piecemiel construction:
+
+%% list the items in Buy.
+> [{I, Q} || {I, Q} <- Buy].
+
+%% replace every item with it's own price:
+> [{shop:cost(I), Q} || {I, Q} <- Buy].
+
+%% multiply cost * quantity to produce extended price.
+> [shop:cost(I) * Q || {I, Q} <- Buy].
+
+%% now sum the resulting price list to produce total price.
+> lists:sum([shop:cost(I) * Q || {I, Q} <- Buy]).
+
+&& as a function:
+total(Lst) ->
+    lists:sum([shop:cost(I) * Q || {I, Q} <- Lst]).
+
+%% a version of map.
+map(F, L) -> [F(X) || X <- L].
+
+%% general form:
+[X || Qualifier1, Qualifier2, ...].
+  Where qualifiers are generators, bitstring generator, filter:
+  1. generator: Pattern <- ListExpr
+  2. BitStringPattern <= BitStringExpr
+  3. filter: predicates or boolean expressions.

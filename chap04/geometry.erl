@@ -7,7 +7,9 @@
 area({rectangle, Width, Height}) ->
     Width * Height;
 area({square, Side}) ->
-    Side * Side.
+    Side * Side;
+area({circle, Radius}) ->
+    3.14158 * Radius * Radius.
 
 
 %% testing function:
