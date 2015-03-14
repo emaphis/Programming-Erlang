@@ -1,0 +1,146 @@
+* chapter 3 -- basic concepts
+
+* starting and stopping the erlang shell.
+erl
+werl
+
+to stop: Ctrl-c or Cntrl Break on windows.
+BREAK: (a)bort (c)ontinue (p)roc info (i)nfo (l)oaded
+       (v)ersion (k)ill (D)b-tables (d)istribution
+a
+$
+> q(). % for a controlled shutdown.
+         shell alias for init:stop().
+   
+> erlang:halt().   % for immediate shuttdown.
+
+f()   forget variables
+f(a)  forget 'a' variable
+
+* commands in the shell.
+% is the comment charater.
+Not all module syntax is an expression and may not be understood by
+the shell.
+
+* shell command line editor.
+-- much like emacs.
+C-a     beginning of the line.
+C-d     deletes the current charater
+C-e     end of line
+C-f     forward a character
+C-b     backward a character
+C-p     fetch previous line
+C-d     fetch next line
+C-t     transpose characters
+C-k     delete to end of line.
+C-l     redraw line
+C-c     copy
+C-v     paste
+C-g     shell break mode
+Tab     tries to expand current module of function name.
+
+* arithmetic
+large integers:
+> 123456789 * 987654321 * 112233445566778899 * 998877665544332211.
+13669560260321809985966198898925761696613427909935341
+/ - floating point divide
+div, rem - integer divide
+
+* variables
+variables don't vary :-)   single-assignment variables.
+'=' is not an assignment operator, it's a pattern matching operator.
+
+A variable is simple form of a pattern. it will match true when it is
+matched against a equal value:
+X = 10.
+X = (3+5).  => false -- ** exception error: no match of right hand side value
+X = (5+5).  => true.
+
+Immutable data make programs easier to debug. Since a variable is set
+once, if it is in error, that error occured when the variable is set.
+
+* atoms
+used to represent constant values.
+the value of an atom is just the atom.
+atoms start with lowercase letters followed by alpha numeric characters
+or '_' '@' -- red, december, cat,
+meters, yards, joe@somehost, and a_long_name.
+
+* tuples
+group fixed number of items into a single entity.
+uses currly brackets:  {ed, 1.82}
+represent a point:
+P = {10, 45}
+or: P = {point,10,45}  -- type tag?
+
+tuples can be nested:
+Person = {person, {name, joe}, {height, 1.82},
+                  {footsize, 42},
+                  {eyecolour, brown}}.
+
+building tuples out of tuples:
+2> F = {firstName, joe}.
+{firstName,joe}
+3> L = {lastName, armstrong}.
+{lastName,armstrong}
+4> P = {person, F, L}.
+{person,{firstName,joe},{lastName,armstrong}}
+
+** extracting values from tuples.
+patterns are used for extracting values from data structures,
+flow control within functions, selecting messages to be processed
+in a parallel program.
+
+1> Point = {point, 10, 45}.
+{point, 10, 45}.
+
+2> {point, X, Y} = Point.
+{point,10,45}
+3> X.
+10
+4> Y.
+45
+
+%% Oops:
+5> {point, C, C} = Point.
+-- ** exception error: no match of right hand side value {point,10,45}
+
+%% but better:
+6> Point1 = {point,25,25}.
+{point,25,25}
+7> {point, C, C} = Point1.
+{point,25,25}
+8> C.
+25
+
+** use '_' as a place holder:
+1> Person={person,{name,ed,maphis},{footsize,11}}.
+{person,{name,ed,maphis},{footsize,11}}
+
+2> {_,{_,Who,_},_} = Person.
+{person,{name,ed,maphis},{footsize,11}}
+
+3> Who.
+ed
+
+* Lists
+store an arbitrary number of tings.
+
+1> Drawing = [{square,{10,10},10}, {triangle,{15,10},{25,10},{30,40}},
+...]
+
+** defining lists
+
+If 'T' is a list the [H|T] is a list with head 'H' and tail 'T'.
+[] is the empty list.
+
+[...|T] constructs a proper list if T is a list. Most Erlang list
+functions assume proper llsts.
+
+3> ThingsToBuy = [{apples,10},{pears,6},{milk,3}].
+{apples,10},{pears,6},{milk,3}]
+
+4> ThingsToBuy1 = [{oranges,4},{newspaper,1} | ThingsToBuy].
+[{oranges,4},{newspaper,1},{apples,10},{pears,6},{milk,3}]
+
+
