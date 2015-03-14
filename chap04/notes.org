@@ -1,0 +1,25 @@
+- modules and functions
+
+basic units of an erlang program, modules contain functions.
+
+* modules are where we store code.
+
+-module(blah).     % module declaration
+must be the same name as the file.
+
+-export([blah/0]). % export declaration 
+Name/N means a function called Name with N arguments.
+functions not exported are private to module.
+
+function pattern matching clauses are separated by semi-colons.
+
+head() -> body.
+
+* directories and code paths
+pwd().   - prints the current working directory
+ls().    - lists the names of the files in cwd.
+cd(Dir). - changes to current working directory.
+
+* adding tests to code.
+using pattern matching can be used to create effective tests
+for erlang functions.
