@@ -143,4 +143,36 @@ functions assume proper llsts.
 4> ThingsToBuy1 = [{oranges,4},{newspaper,1} | ThingsToBuy].
 [{oranges,4},{newspaper,1},{apples,10},{pears,6},{milk,3}]
 
+** extracting things from a list:
+5> [Buy1|ThingsToBuy2] = ThingsToBuy1.
+[{oranges,4},{newspaper,1},{apples,10},{pears,6},{milk,3}]
 
+6> [Buy2,Buy3|ThingsToBuy3] = ThingsToBuy2.
+[{newspaper,1},{apples,10},{pears,6},{milk,3}]
+
+* strings
+a list of integers or a binary.
+
+a list of integers with the values in a certain range are
+treated as strings. the individual integers represent unicode.
+
+use '$' to represent a character as a value:
+$a => 97
+
+* pattern matching
+** examples from the book:
+Pattern = Term                   Result
+{X,abc} = {123,abc}              Succeeds with X = 123
+{X,Y,Z} = {222,def,"cat"}        Succeeds with X = 222, Y = def, and Z = "cat"
+{X,Y}   = {333,ghi,"cat"}        Fails—the tuples have different shapes
+X       = true                   Succeeds with X = true
+{X,Y,X} = {{abc,12},42,{abc,12}} Succeeds with X = {abc,12} and Y = 42
+{X,Y,X} = {{abc,12},42,true}     Fails—X cannot be both {abc,12} and true
+[H|T]   = [1,2,3,4,5]            Succeeds with H = 1 and T = [2,3,4,5]
+[H|T]   = "cat"                  Succeeds with H = 99 and T = "at"
+[A,B,C|T] = [a,b,c,d,e,f]        Succeeds with A = a, B = b, C = c, and T = [d,e,f]
+
+* exercises
+** exercise 3
+House1 = {house, 123, lester_dr}.
+Street1 = [House1, {house, 145, lester_dr}, {house, 166, lester_dr}].
