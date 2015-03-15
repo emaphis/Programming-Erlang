@@ -13,4 +13,3 @@ test_total() ->
     21  = total([{milk,3}]),
     75  = total([{pears,6}, {milk,3}]),
     tests_passed.
-

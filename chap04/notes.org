@@ -122,3 +122,55 @@ map(F, L) -> [F(X) || X <- L].
   1. generator: Pattern <- ListExpr
   2. BitStringPattern <= BitStringExpr
   3. filter: predicates or boolean expressions.
+* BIF's
+some are implemented in erlang, but most are implemented in the VM.
+they provide services that are inefficient or impossible in Erlang.
+
+* guards
+preforms simple tests on variable in a pattern.
+"when 'some predicate' -> something.
+must be free from side effects.
+guards can't call user defined functions.
+
+** guard sequence
+G1; G2; G3; ...;  is true if one of the guard expressions is true.
+
+** guards
+G1, G2, G3, ..., is true if all of the gueard expressions is true.
+
+** examples:
+f(X,Y) when is_integer(X), X > Y, Y < 6 -> ...
+the comma means 'and'.
+
+is_tuple(T), tuple_size(T) =:= 6, abs(element(3, T)) > 5
+element(4, X) =:= hd(L)
+
+X =:= dog; X =:= cat
+is_integer(X), X > Y ; abs(Y) < 23
+the semicolon means 'or'.
+
+%% short-circuit boolean expressions:
+is_atom(L) orelse (is_list(L) andalso lenght(L) > 2)
+
+* case and if expressions
+case Expression of
+  Pattern1 [when Guard1] -> Expr_seq1;
+  Pattern2 [when Guard2] -> Expr_seq2;
+  ...
+end
+
+if
+  Guard1 ->
+    Expr_seq1;
+  Guard2 ->
+    Expr_seq2;
+  ...
+end
+
+* building lists in natual order
+Executing recursive list functions reverses the rebuilt list.
+if the order matters call 'lists:reverse/1' on the list.
+the compiler will add in a highly optomised version of list.
+List ++ [H] is highly inefficient but may be easier to read.
+
+* accumulators
