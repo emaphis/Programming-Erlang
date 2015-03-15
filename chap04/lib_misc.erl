@@ -2,10 +2,10 @@
 
 -module(lib_misc).
 -export([for/3, qsort/1, pythag/1, perms/1, max/2,filter/2,
-         odds_and_evens1/1,odds_and_evens2/1]).
+         odds_and_evens1/1,odds_and_evens2/1,tuple_to_list/1]).
 -export([test_for/0, test_qsort/0, test_pythag/0, test_perms/0,
          test_max/0,test_filter/0,test_odds_and_evens1/0,
-         test_odds_and_evens2/0]).
+         test_odds_and_evens2/0,test_tuple_to_list/0]).
 
 for(Max, Max, F) -> [F(Max)];
 for(I, Max, F)   -> [F(I) | for(I+1, Max, F)].
@@ -116,3 +116,23 @@ test_odds_and_evens2() ->
     {[5,3,1],[6,4,2]} =
         odds_and_evens2([1,2,3,4,5,6]),
     test_passed.
+
+
+%% exercise 2 - write a non-BIF tuple_tolist(T).
+
+tuple_to_list({}) ->
+    [];
+tuple_to_list(T) ->
+    acc_tuple(T, 1, tuple_size(T)).
+
+acc_tuple(T, Len, Len) ->
+    [element(Len, T)];
+acc_tuple(T, Pos, Len) ->
+    [element(Pos, T) | acc_tuple(T, Pos + 1, Len)].
+
+test_tuple_to_list() ->
+    []      = lib_misc:tuple_to_list({}),   % base case.
+    [1,2,3] = lib_misc:tuple_to_list({1,2,3}),
+    [1, "two", three] =
+        lib_misc:tuple_to_list({1, "two", three}),
+    tests_pass.
