@@ -174,3 +174,9 @@ the compiler will add in a highly optomised version of list.
 List ++ [H] is highly inefficient but may be easier to read.
 
 * accumulators
+* date and time
+erlang:now/0
+
+erlang:date/0
+
+erlang:time/0
