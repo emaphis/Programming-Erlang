@@ -5,20 +5,24 @@ erl
 werl
 
 to stop: Ctrl-c or Cntrl Break on windows.
+
 BREAK: (a)bort (c)ontinue (p)roc info (i)nfo (l)oaded
        (v)ersion (k)ill (D)b-tables (d)istribution
 a
 $
+
 > q(). % for a controlled shutdown.
          shell alias for init:stop().
    
 > erlang:halt().   % for immediate shuttdown.
 
 f()   forget variables
+
 f(a)  forget 'a' variable
 
 * commands in the shell.
 % is the comment charater.
+
 Not all module syntax is an expression and may not be understood by
 the shell.
 
@@ -43,6 +47,7 @@ Tab     tries to expand current module of function name.
 large integers:
 > 123456789 * 987654321 * 112233445566778899 * 998877665544332211.
 13669560260321809985966198898925761696613427909935341
+
 / - floating point divide
 div, rem - integer divide
 
