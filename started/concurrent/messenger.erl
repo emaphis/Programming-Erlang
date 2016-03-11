@@ -55,7 +55,10 @@
 %%% Change the function below to return the name of the node where the
 %%% messenger server runs
 server_node() ->
-    messenger@bill.
+    messenger@Kenwood1.
+
+%% now login the server with: start werl -sname messenger
+
 
 %%% This is the server process for the "messenger"
 %%% the user list has the format [{ClientPid1, Name1},{ClientPid22, Name2},...]
