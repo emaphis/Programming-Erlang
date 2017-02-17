@@ -18,6 +18,3 @@ area({triangle, A, B, C}) ->
     sqrt(S*(S-A)*(S-B)*(S-C)).
 
 
-
-
-
