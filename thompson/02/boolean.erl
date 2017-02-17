@@ -16,5 +16,3 @@ b_or(false, A)->
     A;
 b_or(true, _) ->
     true.
-
-
