@@ -1,7 +1,7 @@
 %% conditional expressions
 
 -module(condition).
--export([listlen1/1,listlen/1,index/2]).
+-export([listlen1/1,listlen/1,index/2,factorial/1, even/1, number/1]).
 -include_lib("eunit/include/eunit.hrl").
 
 
@@ -40,9 +40,31 @@ index_test_() ->
      ?_assert(index(1, [1,2,3]) == 2)].
 
 
-unsafe(X) ->
-    case X of
-        one -> Y = true;
-        _   -> Z = two
-    end,
-    Y.
+%unsafe(X) ->
+%    case X of
+%        one -> Y = true;
+%        _   -> Z = two
+%    end,
+%    Y.
+
+%% factorial using a guard.
+factorial(N) when N > 0 ->
+    N * factorial(N - 1);
+factorial(0) -> 1.
+
+
+even(Int) when Int rem 2 == 0 -> true;
+even(Int) when Int rem 2 == 1 -> false.
+
+even_test_() ->
+    [ ?_assert(even(2)),
+      ?_assertNot(even(3)) ].
+
+number(Num) when is_integer(Num) -> integer;
+number(Num) when is_float(Num)   -> float;
+number(_Other) -> false.
+
+number_test_() ->
+    [ ?_assertEqual(number(10), integer),
+      ?_assertEqual(number(1.0), float),
+      ?_assertNot(number(number)) ].
