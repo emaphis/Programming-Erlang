@@ -1,0 +1,24 @@
+* Values in Erlang
+** Numbers
+*** Integer 
+- are arbitrary large bignums
+- different bases: base#number:  2#100,
+- + - * / div rem
+
+*** float
+** Atoms
+- just data that stands for itself,
+- two kinds: atom 'I am an atom'
+- can only compare them for equality, ordering
+
+** Boolean
+- true and false are just atoms, not a special type.
+** Tuples and lists
+- {"Joe", "Armstrong", 55}, {1.2,1.5} {{1.2,.1.4}, {2.4,5.0}}
+- a common idiom: use the first field to type the data:
+ {rectangle, {1.2,1.5}, {2.4,5.0}}
+ {circle, {1.1,2.1}, .30}
+
+-lists are a collection of values
+** Stringsio:format("~lp~n", [S])
+** Functions
