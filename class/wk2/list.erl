@@ -2,7 +2,7 @@
 
 -module(list).
 
--export([head/1,tail/1, second/1, second2/1, sum/1, sum_tc/1]).
+-export([head/1,tail/1, second/1, second2/1, sum/1, sum_tc/1, count/1, foo/1]).
 -export([list_test/0, sum_test/0]).
 
 %% list - order matters and multiplicity matters
@@ -48,3 +48,18 @@ sum_tc(Xs)       -> sum_tc(Xs,0).
 
 sum_tc([],S)     -> S;
 sum_tc([X|Xs],S) -> sum_tc(Xs, X+S).
+
+
+
+
+%% count 0's in a list of any:
+count([0|Xs]) -> 1 + count(Xs);
+count([_X|Xs]) -> count(Xs);
+count([])     -> 0.
+
+%% reverse the list?. Yes.
+foo([X|Xs])  -> bar(foo(Xs), [X]);
+foo([])      -> [].
+
+bar([], Ys)     -> Ys;
+bar([Z|Zs], Ys) -> [Z|bar(Zs,Ys)].
