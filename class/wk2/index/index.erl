@@ -12,6 +12,7 @@ process_lines([], _Count, Acc) -> Acc;
 process_lines([L|Ls], Count, Acc) ->
     Next = Count+ 1,
     process_lines(Ls, Next, process_line(L, Next, Acc)). 
+
 process_line(Line, Count, Acc) ->
     Toks = string:tokens(Line, " ,.-"),
     process_tokens(Toks, Count, Acc).
@@ -19,7 +20,9 @@ process_line(Line, Count, Acc) ->
 process_tokens([], _, Acc) -> Acc;
 process_tokens([T|Ts], Count, Acc) ->
     process_tokens(Ts, Count, [{Count,T} | Acc]).
-                                          
+
+
+
 % Used to read a file into a list of lines.
 % Example files available in:
 %   gettysburg-address.txt (short)
