@@ -1,12 +1,18 @@
 -module(index).
 -export([get_file_contents/1,show_file_contents/1]).
--export([index_file/1,partition/1]).
+-export([index_file/1,print_index/1]).
 -export([partition_test/0]).
+
 
 %% The main prorgram.
 %% Run:
 %%   index:index_file("gettysburg-address.txt").
 %% to produce a list of word indexes.
+%%
+%% To produce a "formated" index listing
+%% Run:
+%%   index:print_index(index:index_file("gettysburg-address.txt")).
+%%
 index_file(File) ->
     Lines = get_file_contents(File),
     Words = process_lines(Lines),
@@ -33,7 +39,6 @@ clean_words([X|Xs]) ->
         false -> clean_words(Xs)
     end.
 
-
 %% Given a list of Words and a Line_number, produce a list of Word, Line_Number pairs.
 index_words([], _, Acc) -> Acc;
 index_words([T|Ts], Count, Acc) ->
@@ -55,8 +60,6 @@ collect_words([{Wrd1,Ln1},{_Wrd2,_Ln2}|Wrds], Acc, Idx) ->
 partition(Lst) -> partition(lists:sort(Lst), []).
 
 partition([], Acc) -> lists:reverse(Acc);
-partition([X|Xs], [{X}|Acc]) ->
-	partition(Xs, [{X}|Acc]);
 partition([X|Xs], [{Start}|Acc]) when X == Start+1 ->
 	partition(Xs, [{Start,X}|Acc]);
 partition([X|Xs], [{Start,X}|Acc]) ->
@@ -64,17 +67,38 @@ partition([X|Xs], [{Start,X}|Acc]) ->
 partition([X|Xs], [{Start,End}|Acc]) when X == End+1 ->
 	partition(Xs, [{Start,X}|Acc]);
 partition([X|Xs], Acc) ->
-	partition(Xs, [{X}|Acc]).
+	partition(Xs, [{X,X}|Acc]).
 
 partition_test() ->    
-    [{1}] = partition([1]),
-    [{1}] = partition([1,1,1]),
+    [{1,1}] = partition([1]),
+    [{1,1}] = partition([1,1,1]),
     [{1,2}] = partition([2,1,1]),
     [{1,3}] = partition([3,2,2,1,1]),
-    [{1,3},{5}] = partition([5,5,3,2,2,1]),
-    [{1},{3},{5,7}] = partition([7,7,6,5,3,1,1]),
+    [{1,3},{5,5}] = partition([5,5,3,2,2,1]),
+    [{1,1},{3,3},{5,7}] = partition([7,7,6,5,3,1,1]),
     ok.
 
+
+%% Print out file world index
+print_index([]) ->  ok;
+print_index([X|Xs]) ->
+    print_item(X),
+    print_index(Xs).
+
+% print single word index item
+print_item({Word, Ranges}) ->
+    io:format("~p ", [Word]),
+    print_ranges(Ranges),
+    io:format("~n").
+
+% print the list of ranges
+print_ranges([]) -> done;
+print_ranges([{Beg,End}|Xs]) ->
+    io:format(",{~p,~p}", [Beg,End]),
+    print_ranges(Xs);
+print_ranges([X]) ->  % sidestep a partition function bug.
+    io:format("{~p,~p}", [X,X]),
+    print_ranges([]).
 
 
 % Used to read a file into a list of lines.
