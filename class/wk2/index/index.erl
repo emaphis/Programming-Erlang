@@ -3,6 +3,12 @@
 -export([index_file/1,print_index/1]).
 -export([partition_test/0]).
 
+-type line_no() :: non_neg_integer().
+-type word() :: [byte()].
+-type word_indx() :: {word(), line_no()}.
+-type locations() :: {word(), [line_no()]}.
+-type range() :: {line_no(), line_no()}.
+
 
 %% The main prorgram.
 %% Run:
@@ -18,20 +24,28 @@ index_file(File) ->
     Words = process_lines(Lines),
     collect_words(Words).
 
-%% Count and process each line of text, produces a list of {Word, Line_Number} pairs.
+%% Count and process each line of text,
+%% produces a list of {Word, Line_Number} pairs.
+-spec process_lines(string()) -> [word_indx()].
 process_lines(Lines) -> process_lines(Lines, 0, []).
-process_lines([], _Count, Acc) -> lists:sort(Acc);
-process_lines([L|Ls], Count, Acc) -> 
-    Next = Count+ 1,
-    process_lines(Ls, Next, index_line(L, Next, Acc)). 
 
-%% Given a line of text, split line into words and produce a list of Word, Line_number pairs.
+-spec process_lines([string()], line_no(), [word_indx()]) -> [word_indx()].
+process_lines([], _Count, Acc) -> lists:sort(Acc);
+process_lines([L|Ls], Count, Acc) ->
+    Next = Count+ 1,
+    process_lines(Ls, Next, index_line(L, Next, Acc)).
+
+%% Given a line of text, split line into words and
+%% produce a list of Word, Line_number pairs.
+-spec index_line(string(), line_no(),[word_indx()]) -> [word_indx()].
 index_line(Line, Count, Acc) ->
     Toks = string:tokens(Line, " \t\n\b\r\\.,:;!?=-"),
     Words = clean_words(Toks),
     index_words(Words, Count, Acc).
 
-%% Given a list of words produces a list of lowercase words above a certain length.
+%% Given a list of words produces a list of lowercase words above
+%%va certain length.
+-spec clean_words([nonempty_string()]) -> [word()].
 clean_words([])     -> [];
 clean_words([X|Xs]) ->
     case string:len(X) > 3  of
@@ -39,37 +53,46 @@ clean_words([X|Xs]) ->
         false -> clean_words(Xs)
     end.
 
-%% Given a list of Words and a Line_number, produce a list of Word, Line_Number pairs.
+%% Given a list of Words and a Line_number, produce a list of Word,
+%% Line_Number pairs.
+-spec index_words([word()], line_no(), [word_indx()]) -> [word_indx()].
 index_words([], _, Acc) -> Acc;
 index_words([T|Ts], Count, Acc) ->
     index_words(Ts, Count, [{T, Count} | Acc]).
 
-%% Given a sorted list of {Word, Line_Numbers} pairs collect into a list of {Word, List-0f-Line-Numbers}.
+%% Given a sorted list of {Word, Line_Numbers} pairs collect into
+%% a list of {Word, List-0f-Line-Numbers}.
+-spec collect_words([word_indx(),...]) -> [locations(),...].
 collect_words(Wrds) -> lists:sort(collect_words(Wrds, [], [])).
+
+-spec collect_words([word_indx(),...],[line_no()],[locations()]) ->
+                           [locations(),...].
 collect_words([{Wrd,Ln}], Acc, Idx) ->
     [{Wrd,lists:sort([Ln|Acc])}|Idx];
 collect_words([{Wrd,Ln1},{Wrd,_Ln2}|Wrds], Acc, Idx) ->
     collect_words(Wrds,[Ln1|Acc], Idx);
 collect_words([{Wrd1,Ln1},{_Wrd2,_Ln2}|Wrds], Acc, Idx) ->
     Index = partition([Ln1|Acc]),
-    collect_words(Wrds, [], [{Wrd1, Index}|Idx]). 
+    collect_words(Wrds, [], [{Wrd1, Index}|Idx]).
 
 
 %% partition a list of numbers into a list of Number Range Pairs.
 %% See test function for examples.
+-spec partition([line_no()]) -> [range()].
 partition(Lst) -> partition(lists:sort(Lst), []).
 
+-spec partition([line_no()],[range()]) -> [range()].
 partition([], Acc) -> lists:reverse(Acc);
-partition([X|Xs], [{Start}|Acc]) when X == Start+1 ->
-	partition(Xs, [{Start,X}|Acc]);
+partition([X|Xs], [{Start,X}|Acc]) when X == Start+1 ->
+    partition(Xs, [{Start,X}|Acc]);
 partition([X|Xs], [{Start,X}|Acc]) ->
-	partition(Xs, [{Start,X}|Acc]);
+    partition(Xs, [{Start,X}|Acc]);
 partition([X|Xs], [{Start,End}|Acc]) when X == End+1 ->
-	partition(Xs, [{Start,X}|Acc]);
+    partition(Xs, [{Start,X}|Acc]);
 partition([X|Xs], Acc) ->
-	partition(Xs, [{X,X}|Acc]).
+    partition(Xs, [{X,X}|Acc]).
 
-partition_test() ->    
+partition_test() ->
     [{1,1}] = partition([1]),
     [{1,1}] = partition([1,1,1]),
     [{1,2}] = partition([2,1,1]),
@@ -109,7 +132,15 @@ print_ranges([X]) ->  % sidestep a partition function bug.
 
 % Get the contents of a text file into a list of lines.
 % Each line has its trailing newline removed.
-
+-spec get_file_contents(atom() |
+                        binary() |
+                        maybe_improper_list(atom() |
+                                            binary() |
+                                            maybe_improper_list(any(),binary() |
+                                                                [])
+                                            | char(),binary() |
+                                            []))
+                       -> [string()].
 get_file_contents(Name) ->
     {ok,File} = file:open(Name,[read]),
     Rev = get_all_lines(File,[]),
@@ -117,6 +148,7 @@ get_file_contents(Name) ->
 
 % Auxiliary function for get_file_contents.
 % Not exported.
+-spec get_all_lines(pid(),[string()]) -> [string()].
 get_all_lines(File,Partial) ->
     case io:get_line(File,"") of
         eof -> file:close(File),
@@ -132,5 +164,4 @@ show_file_contents([L|Ls]) ->
     io:format("~s~n",[L]),
     show_file_contents(Ls);
 show_file_contents([]) ->
-    ok.    
-     
+    ok.
