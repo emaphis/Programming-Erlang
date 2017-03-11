@@ -5,7 +5,7 @@
 -export([comp/2,
          comp_all_r/1, comp_all/1,
          twice/1, quad/1,
-         iteration/2]).
+         iteration/2, iteration2/2]).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -150,6 +150,10 @@ iteration(_, Acc, 0) -> Acc;
 iteration(Fn, Acc, N) ->
     iteration(Fn, comp(Fn, Acc), N-1).
 
+%% iteration using foldr
+iteration2(Fn, N) ->
+    lists:foldr(fun comp/2, fun id/1, lists:duplicate(N, Fn)).
+
 iteration_test() ->
     Mult3 = fun (X) -> X*3 end,
 
@@ -157,4 +161,9 @@ iteration_test() ->
 
     ?assertEqual(18, (comp(Mult3,Mult3)) (2)),  % compare
     ?assertEqual(18, (iteration(Mult3, 2)) (2)),
-    ?assertEqual(54, (iteration(Mult3, 3)) (2)).
+    ?assertEqual(54, (iteration(Mult3, 3)) (2)),
+    
+    ?assertEqual(2,  (iteration2(Mult3, 0)) (2)),  % base case
+    ?assertEqual(18, (iteration2(Mult3, 2)) (2)),
+    ?assertEqual(54, (iteration2(Mult3, 3)) (2)).
+
