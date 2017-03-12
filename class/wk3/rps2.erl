@@ -3,7 +3,7 @@
 -export([play/1,echo/1,play_two/3,val/1,tournament/2]).
 
 %% strategies
--export([rock/1, no_repeat/1, const/1, rock2/1, paper/1, scissors/1, random_choice/1]).
+-export([rock/1, no_repeat/1, const/1, rock2/1, paper/1,rand/1, scissors/1, random_choice/1]).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -163,16 +163,16 @@ const(Play) ->
     fun (_) -> Play end.
 
 -spec rock2([play()]) -> play().
-rock2(Xs) ->
-    (const(rock))(Xs).
+rock2(Plays) ->
+    (const(rock))(Plays).
 
 -spec paper([play()]) -> play().
-paper(Xs) ->
-    (const(paper))(Xs).
+paper(Plays) ->
+    (const(paper))(Plays).
 
 -spec scissors([play()]) -> play().
-scissors(Xs) ->
-   (const(scissors))(Xs).
+scissors(Plays) ->
+   (const(scissors))(Plays).
 
 const_test() ->
   ?assertEqual(rock, rock2([rock,paper,scissors])),
@@ -195,18 +195,69 @@ cycle_test() ->
 rand(_) ->
     enum(random:uniform(3)-1).
 
-
-%% random choice:
-%% choose an random choise of stratagy
--spec random_choice([play()]) -> play().
-random_choice(Xs) ->
-    case random:uniform(8) of
-        1 -> echo(Xs);
-        2 -> rock(Xs);
-        3 -> no_repeat(Xs);
-        4 -> rock2(Xs);
-        5 -> paper(Xs);
-        6 -> scissors(Xs);
-        7 -> cycle(Xs);
-        8 -> rand(Xs)
+%% play the opponents most frequent play
+-spec max_play([play()]) -> play().
+max_play(Plays) ->
+    {Rock,Paper,Scissors} = count_plays(Plays),
+    if
+        Rock >= Paper andalso Rock >= Scissors -> rock;
+        Paper >= Rock andalso Paper >= Scissors -> paper;
+        true -> scissors
     end.
+
+%% play the opponents least frquent play.
+-spec min_play([play()]) -> play().
+min_play(Plays) ->
+    {Rock,Paper,Scissors} = count_plays(Plays),
+    if
+        Rock =< Paper andalso Rock =< Scissors -> rock;
+        Paper =< Rock andalso Paper =< Scissors -> paper;
+        true -> scissors
+    end.
+
+
+max_min_test() ->
+    ?assertEqual(rock, max_play([])),
+    ?assertEqual(rock, min_play([])),
+    ?assertEqual(paper, max_play([paper])),
+    ?assertEqual(rock, min_play([paper])),
+    ?assertEqual(rock, max_play([paper,rock,scissors])),
+    ?assertEqual(rock, min_play([paper,rock, scissors])),
+    ?assertEqual(scissors, max_play([scissors,rock,scissors,paper,scissors,paper])),
+    ?assertEqual(rock, min_play([scissors,rock,scissors,paper,scissors,paper])).
+
+    
+
+%% count plays in a list, store totals in a tuple.
+%% {rock, paper, scissors}.
+
+-spec count_plays([play()]) ->
+                         {non_neg_integer(), non_neg_integer(), non_neg_integer()}.
+count_plays(Plays) ->
+    count_plays(Plays, {0,0,0}).
+
+count_plays([],Acc) -> Acc;
+count_plays([X|Xs],{Rock,Paper,Scissors}) ->
+    case X of
+        rock     -> count_plays(Xs, {Rock+1,Paper,Scissors});
+        paper    -> count_plays(Xs, {Rock,Paper+1,Scissors});
+        scissors -> count_plays(Xs, {Rock,Paper,Scissors+1})
+    end.
+
+count_plays_test() ->
+    ?assertEqual({0,0,0}, count_plays([])),
+    ?assertEqual({1,0,0}, count_plays([rock])),
+    ?assertEqual({0,1,0}, count_plays([paper])),
+    ?assertEqual({0,0,1}, count_plays([scissors])),
+    ?assertEqual({1,2,3}, count_plays([scissors,rock,scissors,paper,scissors,paper])).
+-spec play_list() -> [play()].
+play_list() ->
+    [echo, rock, paper, scissors, no_repeat, cycle, rand, max_play, min_play].
+
+%% play random play:
+%% choose an random choise from a list of stratagies.
+-spec random_choice([play()]) -> play().
+random_choice(_Plays) ->
+    Choice = random:uniform(length(play_list())),
+    (lists:nth(Choice,play_list())).
+
