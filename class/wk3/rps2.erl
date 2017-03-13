@@ -3,7 +3,7 @@
 -export([play/1,echo/1,play_two/3,val/1,tournament/2]).
 
 %% strategies
--export([rock/1, no_repeat/1, const/1, rock2/1, paper/1,rand/1, scissors/1, random_choice/1]).
+-export([rock/1, no_repeat/1, const/1, paper/1, rand/1, scissors/1, random_choice/1]).
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -24,12 +24,12 @@ play_two(StrategyL,StrategyR,N) ->
 
 % FOR YOU TO DEFINE
 % REPLACE THE dummy DEFINITIONS
-
+-spec play_two(strategy(), strategy(), [play()], [play()], non_neg_integer()) -> integer().
 play_two(_,_,PlaysL,PlaysR,0) ->
-   dummy;
+   tournament(PlaysL, PlaysR);
 
 play_two(StrategyL,StrategyR,PlaysL,PlaysR,N) ->
-   dummy.
+   play_two(StrategyL,StrategyR,[StrategyL(PlaysL)|PlaysL], [StrategyR(PlaysL)|PlaysR], (N-1)).
 
 %
 % interactively play against a strategy, provided as argument.
