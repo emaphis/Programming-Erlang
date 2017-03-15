@@ -1,6 +1,6 @@
-%% parser from Kent Universities Erlang Master Class.
+%% expression evaluator from Kent Universities Erlang Master Class.
 
--module(parser).
+-module(expr).
 
 -export([print/1,eval/2,example_1/0, compile/1, run/2, parse/1, execute/2]).
 
