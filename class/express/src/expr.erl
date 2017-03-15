@@ -174,5 +174,9 @@ execute(Env, Expr) ->
 
 
 
-%% TODO: simplification, subtraction, division, unary minus
-%% zcc types booltan
+%% TODO:
+%% simplification,
+%% more operators: subtraction, division, unary minus, rem
+%% variable syntax. let v=e1 in e2.
+%% other types: boolean, if b then e1 else e2
+%% operator precedence BODMAS.
