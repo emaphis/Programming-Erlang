@@ -2,7 +2,10 @@
 
 -module(expr).
 
--export([print/1,eval/2,example_1/0, compile/1, run/2, parse/1, execute/2]).
+-export([print/1,eval/2, compile/1, run/2, parse/1, execute/2, simplify/1]).
+
+%% examples
+-export([example_1/0, expr2/0]).
 
 
 -type expr() :: {'num',integer()}
@@ -25,7 +28,7 @@ print({var, A}) -> atom_to_list(A);
 print({add, LE, RE}) ->
     "(" ++ print(LE)++ "+" ++ print(RE) ++ ")";
 print({mul, LE, RE}) ->
-    "(" ++ print(LE)++ "-" ++ print(RE) ++ ")".
+    "(" ++ print(LE)++ "*" ++ print(RE) ++ ")".
 
 
 %% parsing
@@ -45,8 +48,8 @@ parse([$(|Rest]) ->                            % parse '('
       {E2,Rest3}     = parse(Rest2),           % parse another 'expression'
       [$)|RestFinal] = Rest3,                  % starts with a ')'
       {case Op of
-	  $+ -> {add,E1,E2};
-	  $* -> {mul,E1,E2}
+           $+ -> {add,E1,E2};
+           $* -> {mul,E1,E2}
         end,
        RestFinal};
 
@@ -101,7 +104,7 @@ eval(Env,{mul, LE, RE}) ->
 
 
 %% lookup the value of a var in the envionment.
--spec lookup([{atom(),integer()}],atom()) -> integer().
+-spec lookup(atom(),[{atom(),integer()}]) -> integer().
 
 lookup(A,[{A,N}|_]) -> N;
 lookup(A,[_|Env]) -> lookup(A,Env).
@@ -142,7 +145,7 @@ compile({mul,E1,E2}) ->
     compile(E1) ++ compile(E2) ++ [{mul2}].
 
 
-%% the interpreter. 
+%% the interpreter.
 %% run a sequence (list) of mschine instructions, should only be
 %% a correct sequence
 %% given: [{push,2},{push,3},{push,4},{mul2},{add2}]
@@ -155,7 +158,7 @@ run(Code,Env) ->
 -spec run(program(), env(), stack()) -> integer().
 run([{push, N} | Continue], Env, Stack) ->
     run(Continue, Env, [N|Stack]);
-run([{fetch, A} | Continue], Env, Stack) -> 
+run([{fetch, A} | Continue], Env, Stack) ->
     run(Continue, Env, [lookup(A,Env)|Stack]);
 run([{add2} | Continue], Env, [N1,N2|Stack]) ->
     run(Continue, Env, [(N1+N2)|Stack]);
@@ -168,14 +171,71 @@ run([],_Env,[N]) ->
 %% should produce the same results as eval().
 
 -spec execute(env(),expr()) -> integer().
- 
+
 execute(Env, Expr) ->
     run(compile(Expr), Env).
 
 
+%% simplification
+
+-spec expr2() -> expr().
+expr2() ->
+    {add,
+     {mul,{num,1},{var,b}},
+     {mul,{add,
+           {mul,{num,2},{var,b}},
+           {mul,{num,1},{var,b}}},
+          {num,0}}}.
+
+-spec zeroA(expr()) -> expr().
+zeroA({add,E,{num,0}}) ->
+    E;
+zeroA({add,{num,0},E}) ->
+    E;
+zeroA(E) ->
+    E.
+
+-spec mul0(expr()) -> expr().
+mul0({mul,{num,1},E}) ->
+    E;
+mul0({mul,E,{num,1}}) ->
+    E;
+mul0(E) ->
+    E.
+
+-spec mulZ(expr()) -> expr().
+mulZ({mul,_,{num,0}}) ->
+    {num,0};
+mulZ({mul,{num,0},_}) ->
+    {num,0};
+mulZ(E) ->
+    E.
+
+-spec compose([fun((expr()) -> expr())]) -> fun((expr()) -> expr()).
+compose([]) ->
+    fun (E) -> E end;
+compose([Rule|Rules]) ->
+    fun (E) -> (compose(Rules))(Rule(E)) end.
+
+rules() ->
+    [ fun zeroA/1, fun mul0/1, fun mulZ/1].
+
+-spec simp(fun((expr()) -> expr()),expr()) -> expr().
+simp(F,{add,E1,E2}) ->
+    F({add,simp(F,E1),simp(F,E2)});
+simp(F,{mul,E1,E2}) ->
+    F({mul,simp(F,E1),simp(F,E2)});
+simp(_,E) -> E.
+
+
+-spec simplify(expr()) -> expr().
+simplify(E) ->
+    simp(compose(rules()),E).
+
+
 
 %% TODO:
-%% simplification,
+%% numerical simplification, (3+7)*v -> 10*v
 %% more operators: subtraction, division, unary minus, rem
 %% variable syntax. let v=e1 in e2.
 %% other types: boolean, if b then e1 else e2
