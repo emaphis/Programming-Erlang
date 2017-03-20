@@ -140,7 +140,7 @@ concat_test_() ->
 flatten([]) ->
     [];
 flatten([H|T]) ->
-    concat(flatten(H), flatten(T));
+    flatten(H) ++ flatten(T);
 flatten(X) ->
     [X].
 
