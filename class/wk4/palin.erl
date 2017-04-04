@@ -4,12 +4,12 @@
 
 server() ->
     receive
-        {check, Pid, Str} ->
+        {From, {check, Str}} ->
             case palindrome(Str) of
                 true ->
-                    Pid ! {result, Str ++ " is a palindrome"};
+                    From ! {result, Str ++ " is a palindrome"};
                 false ->
-                    Pid ! {result, Str ++ " is not a palindrome"}
+                    From ! {result, Str ++ " is not a palindrome"}
             end,
             server();
         _ ->
@@ -18,12 +18,12 @@ server() ->
 
 
 client(Pid,Str) ->
-    Pid ! {check, self(), Str},
+    Pid ! {self(), {check, Str}},
     receive
         {result, Result} ->
               io:format("Result from server: ~p~n", [Result])
     end.
-    
+
 %% test run
 %% (emacs@kimba01)2> Palin = spawn(palin,server,[]).
 %% <0.44.0>
@@ -35,7 +35,7 @@ client(Pid,Str) ->
 %% <0.48.0>
 %% (emacs@kimba01)5> Palin ! stop.
 %% stop
-%% (emacs@kimba01)6> 
+%% (emacs@kimba01)6>
 
 
 % palindrome problem
@@ -80,8 +80,3 @@ shunt([],Ys) ->
     Ys;
 shunt([X|Xs],Ys) ->
     shunt(Xs,[X|Ys]).
-
- 
-	
-
-
