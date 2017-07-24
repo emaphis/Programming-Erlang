@@ -13,3 +13,9 @@ math:cos().
 math:pow(2,16).
 
 edoc:files(["drop.erl"], [{dir, "doc"}]).
+
+;; atoms - self evaluate
+-- used in types and pattern matching.
+atom
+atom_2
+'This is an atom'
