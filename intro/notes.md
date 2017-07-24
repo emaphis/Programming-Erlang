@@ -11,3 +11,5 @@ round().
 math:sin().
 math:cos().
 math:pow(2,16).
+
+edoc:files(["drop.erl"], [{dir, "doc"}]).
