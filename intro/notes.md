@@ -47,3 +47,9 @@ io:get_line("Which? > ", 1),
 
 ;; lists
 lists:nth(1, Answer).  ;; first item is '1' not '0'.
+lists:flatten(Full).
+lists:append(A, B).
+++   ;; append.
+lists:reverse(List).
+lists:zip(Lst1,Lst2).
+{Lst1,Lst2} = lists:unzip(List).
