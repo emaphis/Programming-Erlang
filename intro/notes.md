@@ -36,5 +36,14 @@ string:concat("erl", "ang").
 "erl" =:= "erl"  exact equality
 string:equal/2
 re: regular expressions
+Value = string:strip(Input, right, $\n),
+{Distance, _} = string:to_integer(Value), ;; a monad!!
+
+;; io
 io:read().
 io:get_chars("Which? > ", 1).
+io:get_line("Which? > ", 1),
+
+
+;; lists
+lists:nth(1, Answer).  ;; first item is '1' not '0'.
