@@ -27,3 +27,14 @@ Tuple = {earth, 20}.
 element(2, Tuple).
 Tuple2 = setelement(2, Tuple, 40).
 tuple_size(Tuple2).
+
+;; string  - linked list of characters
+io:format("~w string~n" [String])
+"erl" ++ "ang".
+string:concat("erl", "ang").
+"erl" == "ang"
+"erl" =:= "erl"  exact equality
+string:equal/2
+re: regular expressions
+io:read().
+io:get_chars("Which? > ", 1).
