@@ -62,3 +62,8 @@ lists:partition(Compare,List).
 ;; list comprehensions
 [Function(Value) || Value <- List].
 [Function(Value) || Value <- List, Predicate].  ;; filter
+
+
+;; processes
+self().
+pid/3
