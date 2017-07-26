@@ -53,3 +53,12 @@ lists:append(A, B).
 lists:reverse(List).
 lists:zip(Lst1,Lst2).
 {Lst1,Lst2} = lists:unzip(List).
+lists:foreach(Function,List).
+lists:map(Function,List).
+lists:filter(Predicate,List).
+lists:all(Predicate,List).
+lists:partition(Compare,List).
+
+;; list comprehensions
+[Function(Value) || Value <- List].
+[Function(Value) || Value <- List, Predicate].  ;; filter
