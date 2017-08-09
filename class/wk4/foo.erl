@@ -9,27 +9,34 @@ bar() ->
     io:format("bar working~n"),
     io:format("bar finished~n").
 
+%% example run.
+%% 2> spawn(foo,bar,[]).
+%% <0.39.0>
+%% 3> bar started
+%% 3> bar working
+%% 3> bar finished
+
 
 bar(Pid) ->
     Pid ! "bar started~n",
     Pid ! "bar working~n",
     Pid ! "bar finished~n".
 
-%% (emacs@kimba01)7> spawn(foo,bar,[self()]).
-%% <0.61.0>
-%% (emacs@kimba01)8> flush().
+%% 4> spawn(foo,bar,[self()]).
+%% <0.46.0>
+%% 5> flush(). % clear the shell's mailbox
 %% Shell got "bar started~n"
 %% Shell got "bar working~n"
 %% Shell got "bar finished~n"
 %% ok
 
-
+%% process doesn't terminate
 baz() ->
     receive
         Msg ->
             io:format("got: ~s~n",[Msg])
     end,
-    baz().
+    baz().  % recurse
 
 
 bazz() ->
@@ -52,4 +59,3 @@ bazz() ->
 %% (emacs@kimba01)15> Bazz ! stop.
 %% stopped
 %% stop
-

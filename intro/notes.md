@@ -12,7 +12,7 @@ math:sin().
 math:cos().
 math:pow(2,16).
 
-
+* create Erlang documentation
 edoc:files(["drop.erl"], [{dir, "doc"}]).
 
 ;; atoms - self evaluate
@@ -64,6 +64,20 @@ lists:partition(Compare,List).
 [Function(Value) || Value <- List, Predicate].  ;; filter
 
 
-;; processes
-self().
+* processes
+** primatives
+- spawn(Mod, Fun, Args).
+Proc = spawn(foo, bar, []).
+
+- ! - send a message - add a message to a mailbox
+Pid ! Msg
+
+- self(). return process id.
+
+- receive  - receive a message - remove a message from the mailbox
+
+receive
+  Msg -> handle_message().
+end
+
 pid/3
