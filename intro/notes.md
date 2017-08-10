@@ -77,7 +77,14 @@ Pid ! Msg
 - receive  - receive a message - remove a message from the mailbox
 
 receive
-  Msg -> handle_message().
-end
+  Msg1 -> handle_message1();
+  Msg2 -> handle_message2()
+after Time -> handle_timeout()
+end.
+
+;; Register a process
+Pid = spawn(...).
+register(Name, Pid).
+Pid = whereis(Name).
 
 pid/3

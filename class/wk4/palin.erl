@@ -2,7 +2,7 @@
 %%% Part1 of exercise
 
 -module(palin).
--export([server/1, client/1]).
+-export([server/1]).
 
 
 %% @doc the palindrome server.
@@ -40,19 +40,6 @@ server(From) ->
 %% Shell got {result,"(dog) is not a palindrome"}
 %% Shell got {result,"(Madam I'm Adam) is a palindrome"}
 %% ok
-
-
-%% @doc a client to send palindrome server a message.
-client(Pal_server) ->
-    receive
-        {send, Str} ->
-            Pal_server ! {check, Str},
-            client(Pal_server);
-        {result, Msg} ->
-            io:format("recieved message: ~w~n", [Msg]),
-            client(Pal_server);
-        _ -> ok
-    end.
 
 
 %%% Palindrome functions
