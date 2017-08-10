@@ -1,91 +1,87 @@
-%% 1.8 -- mailbox handling experiments
+%%% @doc mailbox processing.
 
 -module(mailbox).
+-export([tester/1, receiver1/0, receiver2/0, tester2/1, receiver3/0]).
 
--export([receiver/0,sender/1,receiver2/0,sender2/1]).
+%%% @doc a function to test receiver processes, send 4 messages
+%%% in quick succession.
+tester(Pid) ->
+    Pid ! one,
+    Pid ! two,
+    Pid ! three,
+    Pid ! four.
 
 
-receiver() ->
+%%% @doc receiver with no delay
+receiver1() ->
     receive
-        stop ->
-            ok;
+        stop -> ok;
         Msg ->
             io:format("message:~w~n", [Msg]),
-            receiver()
+            receiver1()
     end.
 
-%% test run
-%% (emacs@kimba01)25> Pid = spawn(mailbox,receiver,[]).
-%% <0.99.0>
-%% (emacs@kimba01)26> Pid ! hello.
-%% message:hello
-%% hello
-%% (emacs@kimba01)27> Pid ! world.
-%% message:world
-%% world
-%% (emacs@kimba01)28> Pid ! goodbye_world.
-%% message:goodbye_world
-%% goodbye_world
-%% (emacs@kimba01)29> Pid ! stop.
-%% stop
-%% (emacs@kimba01)30>
+
+%% test receiver1
+%% 17> Pid = spawn(mailbox, receiver1, []).
+%% <0.70.0>
+%% 18> mailbox:tester(Pid).
+%% message:one
+%% message:two
+%% four
+%% message:three
+%% 19> message:four
 
 
-sender(Pid) ->
-    Pid ! {ok,40},
-    Pid ! {ok,41},
-    Pid ! {ok,42},
-    Pid ! {ok,43}.
-
-%% second test run:
-%% (emacs@kimba01)20> f().
-%% ok
-%% (emacs@kimba01)21> Pid = spawn(mailbox,receiver,[]).
-%% <0.94.0>
-%% (emacs@kimba01)22> mailbox:sender(Pid).
-%% message:{ok,40}
-%% message:{ok,41}
-%% {ok,43}
-%% message:{ok,42}
-%% (emacs@kimba01)23> message:{ok,43}
-%% (emacs@kimba01)23> Pid ! stop.
-%% stop
-%% (emacs@kimba01)24>
-
-
-%% Priority receive,
-%% please see:
-%% http://stackoverflow.com/questions/8699498/is-there-a-clever-way-to-give-messages-different-priorities
-
+%%% %doc receiver with a delay
 receiver2() ->
+    timer:sleep(1000),
     receive
-        stop ->
-            ok;
-        {first, Str} ->
-            io:format("first - message:~s~n", [Str]),
+        stop -> ok;
+        Msg ->
+            io:format("message:~w~n", [Msg]),
             receiver2()
-    after 0 ->
-         receive
-            stop ->
-               ok;
-            {Priority, Str} ->
-                io:format("~w - message:~s~n", [Priority, Str]),
-                receiver2()
-        end
     end.
 
-sender2(Pid) ->
-    Pid ! {first, "FirstString"},
+%% test receiver2
+%% 3> Pid = spawn(mailbox, receiver2, []).
+%% <0.79.0>
+%% 24> mailbox:tester(Pid).
+%% message:one
+%% four
+%% 25> message:two
+%% 25> message:three
+%% 25> message:four
+%% 25>
+%%% signifcant delay between handling each message
+%%% but in same order as 1
+
+
+%%% @doc tester function for receiver3
+tester2(Pid) ->
     Pid ! {second, "SecondString"},
-    Pid ! {first, "ThirdString"}.
+    Pid ! {first, "FirstString"}.
 
+%%% @doc receiver process testing message order.
+%%% had to look up this method online.
+receiver3() ->
+    receive
+        stop -> ok;
+        {first, Msg1} ->
+            io:format("~s~n", [Msg1])
+    end,
+    receive
+        {second, Msg2} ->
+            io:format("~s~n", [Msg2])
+    end,
+    receiver3().
 
-%% (emacs@kimba01)46> Pid = spawn(mailbox,receiver2,[]).
-%% <0.144.0>
-%% (emacs@kimba01)47> mailbox:sender2(Pid).
-%% first - message:FirstString
-%% first - message:ThirdString
-%% {first,"ThirdString"}
-%% second - message:SecondString
-%% (emacs@kimba01)48> Pid ! stop.
+%% 28> Pid = spawn(mailbox, receiver3, []).
+%% <0.89.0>
+%% 29> mailbox:tester2(Pid).
+%% FirstString
+%% SecondString
+%% {first,"FirstString"}
+%% 30> Pid ! stop.
 %% stop
+%% 31>
