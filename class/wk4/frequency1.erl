@@ -1,90 +1,107 @@
-%% Based on code from
-%%   Erlang Programming
-%%   Francecso Cesarini and Simon Thompson
-%%   O'Reilly, 2008
-%%   http://oreilly.com/catalog/9780596518189/
-%%   http://www.erlangprogramming.org/
-%%   (c) Francesco Cesarini and Simon Thompson
-
-%% 1.13 -- modified version
-%% 1. register a process name.
-
+%%% @doc frequency server step one
+%%% allocate limited frequencies to mobile phone users.
+%%% Server version 0
+%%% Module 1.13 - modifying the frequency server.
 -module(frequency1).
--export([start/0,init/0,loop/1]).
+-export([start/0, init/0]).
 
-%% These are the start functions used to create and
-%% initialize the server.
 
+%% to start.....
+%% Freq =  spawn(frequency, init, []).
+
+-type freq() :: integer().
+
+%%% frequencies is a pair of unallocated and allocated frequencies.
+%-type frequencies() :: {[freq()], [freq()]}.
+
+%%% @doc start the named server.
 start() ->
-  register(frequency1, spawn(frequency1, init, [])).
+    register(frequency1, spawn(frequency1, init, [])).
 
+
+%%% @doc initialize the server with frequencies and start the main loop.
+-spec init() -> {reply, stopped}.
 init() ->
-  Frequencies = {get_frequencies(), []},
-  loop(Frequencies).
+    Frequencies = {get_frequencies(), []},
+    loop(Frequencies).
 
-% Hard Coded
+%% Hard Coded
+-spec get_frequencies() -> [freq()].
 get_frequencies() -> [10,11,12,13,14,15].
 
-%% The Main Loop
+%%% @doc the main server loop.
+-spec loop({[freq()],[freq()]}) -> {reply, stopped}.
 
 loop(Frequencies) ->
-  receive
-    {request, Pid, allocate} ->
-      {NewFrequencies, Reply} = allocate(Frequencies, Pid),
-      Pid ! {reply, Reply},
-      loop(NewFrequencies);
-    {request, Pid , {deallocate, Freq}} ->
-      NewFrequencies = deallocate(Frequencies, Freq, Pid),
-      Pid ! {reply, ok},
-      loop(NewFrequencies);
-    {request, Pid, stop} ->
-      Pid ! {reply, stopped}
-  end.
+    receive
+        {request, Pid, allocate} ->
+            {NewFrequencies, Reply} = allocate(Frequencies, Pid),
+            Pid ! {reply, Reply},
+            loop(NewFrequencies);
 
-%% The Internal Help Functions used to allocate and
-%% deallocate frequencies.
+        {request, Pid, {deallocate, Freq}} ->
+            NewFrequencies = deallocate(Frequencies, Freq),
+            Pid ! {reply, ok},
+            loop(NewFrequencies);
 
-%% check first if frequency is already allocated
+        {request, Pid, stop} ->
+            Pid ! {reply, stopped}
+    end.
+
+
+%%% @doc A client can request that a frequency can be allocated.
+-spec allocate({[freq()],[freq()]}, pid()) ->
+                      {{[freq()],[freq()]},{error,no_frequency} |
+                       {[freq()],[freq()], {error,already_allocated}} |
+                       {ok,freq()}}.
+
 allocate({[], Allocated}, _Pid) ->
-  {{[], Allocated}, {error, no_frequency}};
-allocate({[Freq|Free], Allocated}, Pid) ->
-  case lists:keyfind(Pid, 2, Allocated) of
-    false ->
-      {{Free, [{Freq, Pid}|Allocated]}, {ok, Freq}};
-    _ ->
-      {{[Freq|Free], Allocated}, {error, already_allocated}}    
-  end.
+    {{[], Allocated}, {error, no_frequency}};
 
-deallocate({Free, Allocated}, Freq, Pid) ->
-  case lists:keyfind(Pid, 2, Allocated) of
-    {Freq, Pid} ->
-       NewAllocated=lists:keydelete(Freq, 1, Allocated),
-          {[Freq|Free],  NewAllocated};
-    false  ->
-       {{Free, Allocated}, {error, no_allocation}}
-  end.
+allocate({[Freq|Free], Allocated}, Pid) ->
+    case lists:keymember(Pid, 2, Allocated) of
+        true  -> {{[Freq|Free], Allocated}, {error, already_allocated}};
+        false -> {{Free, [{Freq, Pid}|Allocated]}, {ok, Freq}}
+    end.
+
+%%% @doc A client can request that a frequency can be deallocated.
+-spec deallocate({[freq()],[freq()]}, freq()) -> {[freq()],[freq()]}.
+
+deallocate({Free, Allocated}, Freq) ->
+    case lists:keyfind(Freq, 2, Allocated) of
+        true ->
+            NewAllocated = lists:keydelete(Freq, 1, Allocated),
+            {[Freq|Free], NewAllocated};
+        false -> {Free, Allocated}
+    end.
 
 %% example run:
-%% frequency1:start().
+%% 10> frequency1:start().
 %% true
-%% frequency1 ! {request,self(),allocate}.
+%% 11> frequency1 ! {request,self(),allocate}.
 %% {request,<0.37.0>,allocate}
-%% receive {reply,Msg} -> Msg end.
+%% 12> receive {reply,Msg} -> Msg end.
 %% {ok,10}
-%% frequency1 ! {request,self(),{deallocate,10}}.
+%% 13> f(Msg).
+%% ok.
+%% 14> frequency1 ! {request,self(),{deallocate,10}}.
 %% {request,<0.37.0>,{deallocate,10}}
-%% f(Msg).
+%% 15> receive {reply,Msg} -> Msg end.
 %% ok.
-%% receive {reply,Msg} -> Msg end.
+%% 16> f(Msg).
 %% ok.
-%% frequency1 ! {request,self(),allocate}.
+%% 17> frequency1 ! {request,self(),allocate}.
 %% {request,<0.37.0>,allocate}
+%% 18> receive {reply,Msg} -> Msg end.
+%% {ok,10}
+%% 19> f(Msg).
+%% ok.
+%% 20> frequency1 ! {request,self(),allocate}.
+%% {request,<0.31.0>,allocate}
+%% 18> receive {reply,Msg} -> Msg end.
+%% {ok,10}
 %% f(Msg).
 %% ok.
-%% receive {reply,Msg} -> Msg end.
-%% {ok,10}
-%% frequency1 ! {request,self(),allocate}.
-%% {error,already_allocated}
-%% frequency1 ! {request,self(),stop}.
+%% 22> frequency1 ! {request,self(),stop}.
 %% {request,<0.37.0>,stop}
 %%
