@@ -82,9 +82,41 @@ receive
 after Time -> handle_timeout()
 end.
 
-;; Register a process
-Pid = spawn(...).
-register(Name, Pid).
+pid/3
+
+;; how to pass the pid
+; send message with pid
+
+Server ! {self(), ping}.
+
+receive
+  {Pid, ping} -> Pid ! pong
+end.
+
+; Servers pid as part of the reply
+
+Server ! {self(), ping}.
+receive
+  {Server, pong}  -> hdl_pong().
+end.
+
+receive
+  {Pid, ping} -> Pid ! {self(), pong}
+end.
+
+
+; Register a process - named process
+Server = spawn(M,F,[]).
+register(server, Server).
+server ! {self(), ping}.
+
+register(server, spawn(M,F,[])).  % one step.
+
 Pid = whereis(Name).
 
-pid/3
+; sending a message to a non-existent name is an error...
+; ... the assumption is that a named process should not disappear.
+; typically we name "static", long-lived processes.
+
+; if you send a message before server is registered you have
+; a race condition
